@@ -2,10 +2,11 @@ import { type Event } from '@/types'
 
 type Props = {
   event: Event
+  isAdmin?: boolean
   onClick?: (event: Event) => void
 }
 
-export default function EventBadge({ event, onClick }: Props) {
+export default function EventBadge({ event, isAdmin, onClick }: Props) {
   const bgColor = event.color ?? '#3B82F6'
   const timeLabel = event.start_time
     ? event.end_time
@@ -16,6 +17,12 @@ export default function EventBadge({ event, onClick }: Props) {
   return (
     <button
       type="button"
+      draggable={isAdmin}
+      onDragStart={isAdmin ? (e) => {
+        e.stopPropagation()
+        e.dataTransfer.setData('text/plain', event.id)
+        e.dataTransfer.effectAllowed = 'copyMove'
+      } : undefined}
       onClick={(e) => {
         e.stopPropagation()
         onClick?.(event)
