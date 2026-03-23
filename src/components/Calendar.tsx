@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { type Event } from '@/types'
 import {
   getCalendarDays,
+  getEventsOnDay,
   getNextMonth,
   getPrevMonth,
   toDateStr,
@@ -18,6 +19,12 @@ const MONTH_LABELS = [
   '1月', '2月', '3月', '4月', '5月', '6月',
   '7月', '8月', '9月', '10月', '11月', '12月',
 ]
+
+function formatDayStr(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00')
+  const weekdays = ['日', '月', '火', '水', '木', '金', '土']
+  return `${d.getMonth() + 1}月${d.getDate()}日（${weekdays[d.getDay()]}）`
+}
 
 type Props = {
   userId: string
@@ -43,6 +50,7 @@ export default function Calendar({
   const [showPicker, setShowPicker] = useState(false)
   const [pickerYear, setPickerYear] = useState(initialYear)
   const [viewerEvent, setViewerEvent] = useState<Event | null>(null)
+  const [dayListDate, setDayListDate] = useState<string | null>(null)
 
   const days = getCalendarDays(year, month)
 
@@ -248,6 +256,7 @@ export default function Calendar({
             onDayClick={handleDayClick}
             onEventClick={handleEventClick}
             onEventDrop={isAdmin ? handleEventDrop : undefined}
+            onShowMore={setDayListDate}
           />
         ))}
       </div>
@@ -269,6 +278,61 @@ export default function Calendar({
           event={viewerEvent}
           onClose={() => setViewerEvent(null)}
         />
+      )}
+
+      {/* 日付の予定一覧（+N件タップ時） */}
+      {dayListDate && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/20"
+            onClick={() => setDayListDate(null)}
+          />
+          <div className="fixed bottom-0 left-0 right-0 z-50 max-h-[70vh] flex flex-col rounded-t-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
+              <span className="font-bold text-gray-900">{formatDayStr(dayListDate)}</span>
+              <div className="flex items-center gap-3">
+                {isAdmin && (
+                  <button
+                    onClick={() => { setDayListDate(null); handleDayClick(dayListDate) }}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                  >
+                    ＋ 追加
+                  </button>
+                )}
+                <button
+                  onClick={() => setDayListDate(null)}
+                  className="text-xl leading-none text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto px-4 py-3 flex flex-col gap-1">
+              {getEventsOnDay(events, dayListDate).map((event) => (
+                <button
+                  key={event.id}
+                  type="button"
+                  onClick={() => { setDayListDate(null); handleEventClick(event) }}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-gray-50"
+                >
+                  <div
+                    className="h-3 w-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: event.color ?? '#3B82F6' }}
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-gray-900">{event.title}</p>
+                    {event.start_time && (
+                      <p className="text-xs text-gray-500">
+                        {event.start_time.slice(0, 5)}
+                        {event.end_time ? `〜${event.end_time.slice(0, 5)}` : ''}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
