@@ -6,6 +6,7 @@ import {
   getCalendarDays,
   getNextMonth,
   getPrevMonth,
+  toDateStr,
 } from '@/lib/calendar-utils'
 import CalendarCell from './CalendarCell'
 import EventModal from './EventModal'
@@ -78,6 +79,42 @@ export default function Calendar({
     setSelectedEvent(null)
     setIsModalOpen(true)
   }
+
+  const handleEventDrop = useCallback(async (eventId: string, targetDateStr: string, copy: boolean) => {
+    const event = events.find((e) => e.id === eventId)
+    if (!event) return
+
+    const srcDate = new Date(event.date + 'T00:00:00')
+    const dstDate = new Date(targetDateStr + 'T00:00:00')
+    const deltaDays = Math.round((dstDate.getTime() - srcDate.getTime()) / (1000 * 60 * 60 * 24))
+
+    if (!copy && deltaDays === 0) return
+
+    const shiftDate = (dateStr: string) => {
+      const d = new Date(dateStr + 'T00:00:00')
+      d.setDate(d.getDate() + deltaDays)
+      return toDateStr(d)
+    }
+
+    const payload = {
+      user_id: userId,
+      title: event.title,
+      date: shiftDate(event.date),
+      end_date: event.end_date ? shiftDate(event.end_date) : null,
+      start_time: event.start_time,
+      end_time: event.end_time,
+      memo: event.memo,
+      color: event.color,
+    }
+
+    const supabase = createClient()
+    if (copy) {
+      await supabase.from('events').insert(payload)
+    } else {
+      await supabase.from('events').update(payload).eq('id', event.id)
+    }
+    await refreshEvents()
+  }, [events, userId, refreshEvents])
 
   const handleEventClick = (event: Event) => {
     if (isAdmin) {
@@ -210,6 +247,7 @@ export default function Calendar({
             isAdmin={isAdmin}
             onDayClick={handleDayClick}
             onEventClick={handleEventClick}
+            onEventDrop={isAdmin ? handleEventDrop : undefined}
           />
         ))}
       </div>

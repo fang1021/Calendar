@@ -65,6 +65,31 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
     handleClose()
   }
 
+  const handleDuplicate = async () => {
+    if (!event) return
+    setLoading(true)
+    setError('')
+    const supabase = createClient()
+    const payload = {
+      user_id: userId,
+      title: title.trim(),
+      date: startDate,
+      end_date: endDate || null,
+      start_time: startTime || null,
+      end_time: endTime || null,
+      memo: memo.trim() || null,
+      color,
+    }
+    const { error: dbError } = await supabase.from('events').insert(payload)
+    setLoading(false)
+    if (dbError) {
+      setError(dbError.message)
+      return
+    }
+    onSaved()
+    handleClose()
+  }
+
   const handleDelete = async () => {
     if (!event) return
     if (!confirm('この予定を削除しますか？')) return
@@ -204,14 +229,24 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
         {/* ボタン */}
         <div className="flex justify-between pt-2">
           {event && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={loading}
-              className="rounded-lg px-4 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
-            >
-              削除
-            </button>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={handleDuplicate}
+                disabled={loading}
+                className="rounded-lg px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+              >
+                複製
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={loading}
+                className="rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 disabled:opacity-50"
+              >
+                削除
+              </button>
+            </div>
           )}
           <div className="ml-auto flex gap-2">
             <button

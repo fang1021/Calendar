@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { type CalendarDay, type Event } from '@/types'
 import { getEventsOnDay } from '@/lib/calendar-utils'
 import EventBadge from './EventBadge'
@@ -8,6 +9,7 @@ type Props = {
   isAdmin: boolean
   onDayClick?: (dateStr: string) => void
   onEventClick?: (event: Event) => void
+  onEventDrop?: (eventId: string, targetDateStr: string, copy: boolean) => void
 }
 
 export default function CalendarCell({
@@ -16,7 +18,9 @@ export default function CalendarCell({
   isAdmin,
   onDayClick,
   onEventClick,
+  onEventDrop,
 }: Props) {
+  const [isDragOver, setIsDragOver] = useState(false)
   const dayEvents = getEventsOnDay(events, day.dateStr)
   const maxVisible = 2
   const overflowCount = dayEvents.length - maxVisible
@@ -26,6 +30,7 @@ export default function CalendarCell({
     !day.isCurrentMonth ? 'bg-gray-50' : 'bg-white',
     day.isToday ? 'bg-blue-50' : '',
     isAdmin && day.isCurrentMonth ? 'cursor-pointer hover:bg-blue-50/60' : '',
+    isDragOver && isAdmin ? 'ring-2 ring-inset ring-blue-400 bg-blue-100/60' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -48,6 +53,22 @@ export default function CalendarCell({
           onDayClick?.(day.dateStr)
         }
       }}
+      onDragOver={(e) => {
+        if (!isAdmin) return
+        e.preventDefault()
+        e.dataTransfer.dropEffect = e.ctrlKey ? 'copy' : 'move'
+        setIsDragOver(true)
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        if (!isAdmin) return
+        e.preventDefault()
+        setIsDragOver(false)
+        const eventId = e.dataTransfer.getData('text/plain')
+        if (eventId) {
+          onEventDrop?.(eventId, day.dateStr, e.ctrlKey)
+        }
+      }}
     >
       {/* 日付数字 */}
       <div className={dateNumClass}>
@@ -66,6 +87,7 @@ export default function CalendarCell({
           <EventBadge
             key={event.id}
             event={event}
+            isAdmin={isAdmin}
             onClick={onEventClick}
           />
         ))}
