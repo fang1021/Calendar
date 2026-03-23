@@ -15,8 +15,9 @@ type Props = {
 export default function EventModal({ userId, date, event, onClose, onSaved }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [title, setTitle] = useState(event?.title ?? '')
-  const [startDate, setStartDate] = useState(event?.date ?? date)
-  const [endDate, setEndDate] = useState(event?.end_date ?? '')
+  const initialStartDate = event?.date ?? date
+  const [startDate, setStartDate] = useState(initialStartDate)
+  const [endDate, setEndDate] = useState(event?.end_date ?? initialStartDate)
   const [startTime, setStartTime] = useState(event?.start_time ?? '')
   const [endTime, setEndTime] = useState(event?.end_time ?? '')
   const [memo, setMemo] = useState(event?.memo ?? '')
@@ -111,7 +112,10 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
             <input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                setStartDate(e.target.value)
+                if (!endDate || endDate < e.target.value) setEndDate(e.target.value)
+              }}
               required
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
