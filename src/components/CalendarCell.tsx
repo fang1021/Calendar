@@ -36,7 +36,7 @@ export default function CalendarCell({
   const dayOfWeek = day.date.getDay() // 0=日, 6=土
 
   const cellClass = [
-    'relative flex flex-col border-r border-b border-gray-200 p-0.5',
+    'relative flex flex-col border-r border-b border-gray-200 p-0.5 overflow-hidden min-w-0',
     !day.isCurrentMonth ? 'bg-gray-50' : 'bg-white',
     day.isToday ? 'bg-blue-50' : '',
     isAdmin && day.isCurrentMonth ? 'cursor-pointer hover:bg-blue-50/60' : '',
