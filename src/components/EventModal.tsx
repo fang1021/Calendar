@@ -12,6 +12,57 @@ type Props = {
   onSaved: () => void
 }
 
+const MINUTE_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+
+// 5分刻みのセレクト式時刻ピッカー
+function TimePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const match = value.match(/^(\d{2}):(\d{2})$/)
+  const hour = match ? match[1] : ''
+  const minute = match ? match[2] : '00'
+
+  // 既存データの分が5分刻みでない場合でも表示できるよう追加
+  const minuteNum = parseInt(minute, 10)
+  const minuteOptions = MINUTE_OPTIONS.includes(minuteNum)
+    ? MINUTE_OPTIONS
+    : [...MINUTE_OPTIONS, minuteNum].sort((a, b) => a - b)
+
+  const update = (h: string, m: string) => {
+    if (!h) { onChange(''); return }
+    onChange(`${h}:${m}`)
+  }
+
+  const selectClass = 'flex-1 rounded-lg border border-gray-300 px-2 py-2 text-sm focus:border-blue-500 focus:outline-none'
+
+  return (
+    <div className="flex items-center gap-1">
+      <select
+        value={hour}
+        onChange={(e) => update(e.target.value, minute)}
+        className={selectClass}
+      >
+        <option value="">--</option>
+        {HOUR_OPTIONS.map((h) => (
+          <option key={h} value={h}>{h}</option>
+        ))}
+      </select>
+      <span className="shrink-0 text-gray-400 font-medium">:</span>
+      <select
+        value={minute}
+        onChange={(e) => update(hour, e.target.value)}
+        disabled={!hour}
+        className={`${selectClass} disabled:opacity-40`}
+      >
+        {minuteOptions.map((m) => (
+          <option key={m} value={String(m).padStart(2, '0')}>
+            {String(m).padStart(2, '0')}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 export default function EventModal({ userId, date, event, onClose, onSaved }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [title, setTitle] = useState(event?.title ?? '')
@@ -172,26 +223,13 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
             <label className="mb-1 block text-sm font-medium text-gray-700">
               開始時刻
             </label>
-            <input
-              type="time"
-              value={startTime}
-              step={300}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            />
+            <TimePicker value={startTime} onChange={setStartTime} />
           </div>
           <div className="flex-1">
             <label className="mb-1 block text-sm font-medium text-gray-700">
               終了時刻
             </label>
-            <input
-              type="time"
-              value={endTime}
-              step={300}
-              min={startDate === endDate && startTime ? startTime : undefined}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            />
+            <TimePicker value={endTime} onChange={setEndTime} />
           </div>
         </div>
 
