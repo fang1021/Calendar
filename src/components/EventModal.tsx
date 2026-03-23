@@ -17,6 +17,8 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
   const [title, setTitle] = useState(event?.title ?? '')
   const [startDate, setStartDate] = useState(event?.date ?? date)
   const [endDate, setEndDate] = useState(event?.end_date ?? '')
+  const [startTime, setStartTime] = useState(event?.start_time ?? '')
+  const [endTime, setEndTime] = useState(event?.end_time ?? '')
   const [memo, setMemo] = useState(event?.memo ?? '')
   const [color, setColor] = useState(event?.color ?? COLOR_PRESETS[4].value)
   const [loading, setLoading] = useState(false)
@@ -43,6 +45,8 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
       title: title.trim(),
       date: startDate,
       end_date: endDate || null,
+      start_time: startTime || null,
+      end_time: endTime || null,
       memo: memo.trim() || null,
       color,
     }
@@ -121,6 +125,32 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
               value={endDate}
               min={startDate}
               onChange={(e) => setEndDate(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {/* 時刻 */}
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              開始時刻
+            </label>
+            <input
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              終了時刻
+            </label>
+            <input
+              type="time"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
           </div>

@@ -4,6 +4,8 @@ export type Event = {
   title: string
   date: string       // YYYY-MM-DD
   end_date: string | null
+  start_time: string | null  // HH:MM
+  end_time: string | null    // HH:MM
   memo: string | null
   color: string | null
   created_at: string
