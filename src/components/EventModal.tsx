@@ -175,6 +175,7 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
             <input
               type="time"
               value={startTime}
+              step={300}
               onChange={(e) => setStartTime(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
@@ -186,6 +187,7 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
             <input
               type="time"
               value={endTime}
+              step={300}
               min={startDate === endDate && startTime ? startTime : undefined}
               onChange={(e) => setEndTime(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"

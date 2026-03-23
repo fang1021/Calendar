@@ -46,9 +46,8 @@ export default function CalendarCell({
     .join(' ')
 
   const dateNumClass = [
-    'text-right text-xs font-semibold leading-none mb-0.5 px-0.5',
+    'flex items-center justify-end h-4 mb-0.5 px-0.5 text-xs font-semibold',
     !day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700',
-    day.isToday ? 'flex items-center justify-end' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -85,7 +84,7 @@ export default function CalendarCell({
             {day.date.getDate()}
           </span>
         ) : (
-          <span>{day.date.getDate()}</span>
+          <span className="leading-none">{day.date.getDate()}</span>
         )}
       </div>
 
