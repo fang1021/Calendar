@@ -28,6 +28,12 @@ export default function EventBadge({
     isEnd ? 'rounded-l-none rounded-r' :
     'rounded-none'
 
+  // 隣接セルの border (1px) を box-shadow で視覚的に跨ぐ
+  const shadows: string[] = []
+  if (!isStart) shadows.push(`-2px 0 0 0 ${bgColor}`)
+  if (!isEnd) shadows.push(`2px 0 0 0 ${bgColor}`)
+  const boxShadow = shadows.length > 0 ? shadows.join(', ') : undefined
+
   return (
     <button
       type="button"
@@ -42,7 +48,7 @@ export default function EventBadge({
         onClick?.(event)
       }}
       className={`w-full truncate ${roundedClass} ${isStart ? 'px-1' : 'px-0'} py-0.5 text-left text-[10px] font-medium leading-tight text-white`}
-      style={{ backgroundColor: bgColor }}
+      style={{ backgroundColor: bgColor, boxShadow }}
       title={event.title}
     >
       {isStart ? (
