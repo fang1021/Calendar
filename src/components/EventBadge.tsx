@@ -8,7 +8,9 @@ type Props = {
 export default function EventBadge({ event, onClick }: Props) {
   const bgColor = event.color ?? '#3B82F6'
   const timeLabel = event.start_time
-    ? event.start_time.slice(0, 5)
+    ? event.end_time
+      ? `${event.start_time.slice(0, 5)}〜${event.end_time.slice(0, 5)}`
+      : event.start_time.slice(0, 5)
     : null
 
   return (

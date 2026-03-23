@@ -182,7 +182,7 @@ export default function Calendar({
       {/* 曜日ヘッダー */}
       <div
         className="grid border-b border-gray-200"
-        style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 2fr' }}
+        style={{ gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr 1fr 3fr' }}
       >
         {WEEKDAY_LABELS.map((label, i) => (
           <div
@@ -200,7 +200,7 @@ export default function Calendar({
       {/* カレンダーグリッド（6行） */}
       <div
         className="grid flex-1 grid-rows-6 border-l border-t border-gray-200"
-        style={{ gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 2fr' }}
+        style={{ gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr 1fr 3fr' }}
       >
         {days.map((day) => (
           <CalendarCell

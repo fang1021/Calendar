@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { type Event } from '@/types'
 
 type Props = {
@@ -19,8 +18,6 @@ function formatTime(timeStr: string | null) {
 }
 
 export default function ViewerEventDetail({ event, onClose }: Props) {
-  const [showMemo, setShowMemo] = useState(false)
-
   const startTime = formatTime(event.start_time)
   const endTime = formatTime(event.end_time)
   const isMultiDay = event.end_date && event.end_date !== event.date
@@ -66,22 +63,11 @@ export default function ViewerEventDetail({ event, onClose }: Props) {
             </p>
           )}
 
-          {/* メモ（切り替え） */}
+          {/* お知らせ（メモ） */}
           {event.memo && (
-            <div className="mt-3">
-              <button
-                onClick={() => setShowMemo(!showMemo)}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
-              >
-                <span>{showMemo ? '▲' : '▼'}</span>
-                <span>{showMemo ? 'お知らせを閉じる' : 'お知らせを見る'}</span>
-              </button>
-              {showMemo && (
-                <p className="mt-2 rounded-lg bg-blue-50 px-3 py-2 text-sm text-gray-700 whitespace-pre-wrap">
-                  {event.memo}
-                </p>
-              )}
-            </div>
+            <p className="mt-3 rounded-lg bg-blue-50 px-3 py-2 text-sm text-gray-700 whitespace-pre-wrap">
+              {event.memo}
+            </p>
           )}
         </div>
       </div>
