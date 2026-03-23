@@ -36,7 +36,7 @@ export default function CalendarCell({
   const dayOfWeek = day.date.getDay() // 0=日, 6=土
 
   const cellClass = [
-    'relative flex flex-col border-r border-b border-gray-200 p-0.5 overflow-hidden',
+    'relative flex flex-col border-r border-b border-gray-200 p-0.5',
     !day.isCurrentMonth ? 'bg-gray-50' : 'bg-white',
     day.isToday ? 'bg-blue-50' : '',
     isAdmin && day.isCurrentMonth ? 'cursor-pointer hover:bg-blue-50/60' : '',
@@ -90,7 +90,7 @@ export default function CalendarCell({
       </div>
 
       {/* 予定バッジ */}
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-0.5 -mx-0.5">
         {dayEvents.slice(0, maxVisible).map((event) => {
           const eventEnd = event.end_date ?? event.date
           const isMultiDay = event.end_date && event.end_date !== event.date

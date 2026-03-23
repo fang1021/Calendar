@@ -41,7 +41,7 @@ export default function EventBadge({
         e.stopPropagation()
         onClick?.(event)
       }}
-      className={`w-full truncate ${roundedClass} px-1 py-0.5 text-left text-[10px] font-medium leading-tight text-white`}
+      className={`w-full truncate ${roundedClass} ${isStart ? 'px-1' : 'px-0'} py-0.5 text-left text-[10px] font-medium leading-tight text-white`}
       style={{ backgroundColor: bgColor }}
       title={event.title}
     >
