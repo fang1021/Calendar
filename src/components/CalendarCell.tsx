@@ -66,7 +66,7 @@ export default function CalendarCell({
           <EventBadge
             key={event.id}
             event={event}
-            onClick={isAdmin ? onEventClick : undefined}
+            onClick={onEventClick}
           />
         ))}
         {overflowCount > 0 && (
