@@ -37,6 +37,13 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim()) return
+
+    // 同日の場合、終了時刻が開始時刻より前なら弾く
+    if (startTime && endTime && startDate === endDate && endTime < startTime) {
+      setError('終了時刻は開始時刻より後にしてください')
+      return
+    }
+
     setLoading(true)
     setError('')
 
@@ -179,6 +186,7 @@ export default function EventModal({ userId, date, event, onClose, onSaved }: Pr
             <input
               type="time"
               value={endTime}
+              min={startDate === endDate && startTime ? startTime : undefined}
               onChange={(e) => setEndTime(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />

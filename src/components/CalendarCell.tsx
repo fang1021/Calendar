@@ -10,6 +10,7 @@ type Props = {
   onDayClick?: (dateStr: string) => void
   onEventClick?: (event: Event) => void
   onEventDrop?: (eventId: string, targetDateStr: string, copy: boolean) => void
+  onShowMore?: (dateStr: string) => void
 }
 
 export default function CalendarCell({
@@ -19,11 +20,20 @@ export default function CalendarCell({
   onDayClick,
   onEventClick,
   onEventDrop,
+  onShowMore,
 }: Props) {
   const [isDragOver, setIsDragOver] = useState(false)
-  const dayEvents = getEventsOnDay(events, day.dateStr)
+
+  // 複数日イベントを先頭に並べる
+  const dayEvents = getEventsOnDay(events, day.dateStr).sort((a, b) => {
+    const aMulti = a.end_date && a.end_date !== a.date ? 1 : 0
+    const bMulti = b.end_date && b.end_date !== b.date ? 1 : 0
+    return bMulti - aMulti
+  })
   const maxVisible = 2
   const overflowCount = dayEvents.length - maxVisible
+
+  const dayOfWeek = day.date.getDay() // 0=日, 6=土
 
   const cellClass = [
     'relative flex flex-col border-r border-b border-gray-200 p-0.5 overflow-hidden',
@@ -38,9 +48,7 @@ export default function CalendarCell({
   const dateNumClass = [
     'text-right text-xs font-semibold leading-none mb-0.5 px-0.5',
     !day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700',
-    day.isToday
-      ? 'flex items-center justify-end'
-      : '',
+    day.isToday ? 'flex items-center justify-end' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -83,18 +91,35 @@ export default function CalendarCell({
 
       {/* 予定バッジ */}
       <div className="flex flex-col gap-0.5">
-        {dayEvents.slice(0, maxVisible).map((event) => (
-          <EventBadge
-            key={event.id}
-            event={event}
-            isAdmin={isAdmin}
-            onClick={onEventClick}
-          />
-        ))}
+        {dayEvents.slice(0, maxVisible).map((event) => {
+          const eventEnd = event.end_date ?? event.date
+          const isMultiDay = event.end_date && event.end_date !== event.date
+          // 視覚的な開始：イベント開始日 OR 週の先頭（日曜）
+          const isStart = !isMultiDay || event.date === day.dateStr || dayOfWeek === 0
+          // 視覚的な終了：イベント終了日 OR 週の末尾（土曜）
+          const isEnd = !isMultiDay || eventEnd === day.dateStr || dayOfWeek === 6
+          return (
+            <EventBadge
+              key={event.id}
+              event={event}
+              isAdmin={isAdmin}
+              isStart={isStart}
+              isEnd={isEnd}
+              onClick={onEventClick}
+            />
+          )
+        })}
         {overflowCount > 0 && (
-          <span className="px-1 text-[10px] text-gray-500">
+          <button
+            type="button"
+            className="w-full px-1 text-left text-[10px] text-gray-500 hover:text-blue-600"
+            onClick={(e) => {
+              e.stopPropagation()
+              onShowMore?.(day.dateStr)
+            }}
+          >
             +{overflowCount}件
-          </span>
+          </button>
         )}
       </div>
     </div>
