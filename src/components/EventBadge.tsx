@@ -28,12 +28,6 @@ export default function EventBadge({
     isEnd ? 'rounded-l-none rounded-r' :
     'rounded-none'
 
-  // 継続日はセル端まで延ばす（左右の余白をキャンセル）
-  const marginClass = [
-    !isStart ? '-ml-0.5' : '',
-    !isEnd ? '-mr-0.5' : '',
-  ].filter(Boolean).join(' ')
-
   return (
     <button
       type="button"
@@ -47,15 +41,18 @@ export default function EventBadge({
         e.stopPropagation()
         onClick?.(event)
       }}
-      className={`w-full truncate ${roundedClass} ${marginClass} px-1 py-0.5 text-left text-[10px] font-medium leading-tight text-white`}
+      className={`w-full truncate ${roundedClass} px-1 py-0.5 text-left text-[10px] font-medium leading-tight text-white`}
       style={{ backgroundColor: bgColor }}
       title={event.title}
     >
-      {isStart && (
+      {isStart ? (
         <>
           {timeLabel && <span className="mr-0.5 opacity-90">{timeLabel}</span>}
           {event.title}
         </>
+      ) : (
+        // 高さを揃えるための不可視テキスト
+        <span className="invisible" aria-hidden="true">x</span>
       )}
     </button>
   )
