@@ -9,9 +9,14 @@ import {
 } from '@/lib/calendar-utils'
 import CalendarCell from './CalendarCell'
 import EventModal from './EventModal'
+import ViewerEventDetail from './ViewerEventDetail'
 import { createClient } from '@/lib/supabase/client'
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土']
+const MONTH_LABELS = [
+  '1月', '2月', '3月', '4月', '5月', '6月',
+  '7月', '8月', '9月', '10月', '11月', '12月',
+]
 
 type Props = {
   userId: string
@@ -34,6 +39,9 @@ export default function Calendar({
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showPicker, setShowPicker] = useState(false)
+  const [pickerYear, setPickerYear] = useState(initialYear)
+  const [viewerEvent, setViewerEvent] = useState<Event | null>(null)
 
   const days = getCalendarDays(year, month)
 
@@ -59,6 +67,12 @@ export default function Calendar({
     setMonth(m)
   }
 
+  const handleToday = () => {
+    const today = new Date()
+    setYear(today.getFullYear())
+    setMonth(today.getMonth())
+  }
+
   const handleDayClick = (dateStr: string) => {
     setSelectedDate(dateStr)
     setSelectedEvent(null)
@@ -66,30 +80,103 @@ export default function Calendar({
   }
 
   const handleEventClick = (event: Event) => {
-    setSelectedDate(event.date)
-    setSelectedEvent(event)
-    setIsModalOpen(true)
+    if (isAdmin) {
+      setSelectedDate(event.date)
+      setSelectedEvent(event)
+      setIsModalOpen(true)
+    } else {
+      setViewerEvent(event)
+    }
+  }
+
+  const handlePickerOpen = () => {
+    setPickerYear(year)
+    setShowPicker(true)
+  }
+
+  const handleYearMonthSelect = (y: number, m: number) => {
+    setYear(y)
+    setMonth(m)
+    setShowPicker(false)
   }
 
   return (
     <div className="flex h-dvh flex-col bg-white">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2">
+      <div className="relative flex items-center justify-between border-b border-gray-200 px-3 py-2">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handlePrev}
+            className="rounded-lg px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
+          >
+            ◀ 前月
+          </button>
+          <button
+            onClick={handleToday}
+            className="rounded-lg border border-blue-200 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50"
+          >
+            今日
+          </button>
+        </div>
+
         <button
-          onClick={handlePrev}
-          className="rounded-lg px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
+          onClick={handlePickerOpen}
+          className="text-base font-bold text-gray-800 hover:text-blue-600 hover:underline"
         >
-          ◀ 前月
-        </button>
-        <h1 className="text-base font-bold text-gray-800">
           {year}年{month + 1}月
-        </h1>
+        </button>
+
         <button
           onClick={handleNext}
           className="rounded-lg px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
         >
           翌月 ▶
         </button>
+
+        {/* 年月ピッカー */}
+        {showPicker && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowPicker(false)}
+            />
+            <div className="absolute left-1/2 top-full z-50 mt-1 w-64 -translate-x-1/2 rounded-xl border border-gray-200 bg-white p-3 shadow-lg">
+              {/* 年ナビ */}
+              <div className="mb-2 flex items-center justify-between">
+                <button
+                  onClick={() => setPickerYear((y) => y - 1)}
+                  className="rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
+                >
+                  ◀
+                </button>
+                <span className="font-bold text-gray-800">{pickerYear}年</span>
+                <button
+                  onClick={() => setPickerYear((y) => y + 1)}
+                  className="rounded px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
+                >
+                  ▶
+                </button>
+              </div>
+              {/* 月グリッド */}
+              <div className="grid grid-cols-4 gap-1">
+                {MONTH_LABELS.map((label, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleYearMonthSelect(pickerYear, i)}
+                    className={[
+                      'rounded py-1.5 text-sm',
+                      pickerYear === year && i === month
+                        ? 'bg-blue-600 font-bold text-white'
+                        : 'text-gray-700 hover:bg-blue-50',
+                    ].join(' ')}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 曜日ヘッダー */}
@@ -135,6 +222,14 @@ export default function Calendar({
           event={selectedEvent}
           onClose={() => setIsModalOpen(false)}
           onSaved={refreshEvents}
+        />
+      )}
+
+      {/* 閲覧者用イベント詳細 */}
+      {!isAdmin && viewerEvent && (
+        <ViewerEventDetail
+          event={viewerEvent}
+          onClose={() => setViewerEvent(null)}
         />
       )}
     </div>
